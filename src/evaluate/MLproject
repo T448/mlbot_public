@@ -1,0 +1,14 @@
+name: mlbot
+python_env: ../python_env.yaml
+
+entry_points:
+  evaluate:
+    parameters:
+      mlflow_run_id: {type: string, default: ""}
+      preprocess_run_id: {type: string, default: ""}
+      train_1st_run_id: {type: string, default: ""}
+      train_2nd_run_id: {type: string, default: ""}
+      build_run_id: {type: string, default: ""}
+    command: |
+      env | grep MLFLOW && \
+      python evaluate.py --mlflow_run_id {mlflow_run_id} --preprocess_run_id {preprocess_run_id} --train_1st_run_id {train_1st_run_id} --train_2nd_run_id {train_2nd_run_id} --build_run_id {build_run_id}

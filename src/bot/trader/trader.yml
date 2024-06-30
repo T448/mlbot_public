@@ -1,0 +1,4 @@
+trader:
+  pair: BTCUSDT
+  lot: 0.001
+  max-pyramiding: 3
