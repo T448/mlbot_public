@@ -6,7 +6,7 @@ from lightgbm import LGBMClassifier
 from sklearn.base import BaseEstimator
 from entity.backtest_params import BackTestParams
 from entity.optimize_params import OptimizeParams
-from logic.kumosuke_limit import kumosuke_limit
+from logic.sample_logic_limit import sample_logic_limit
 
 ARGUMENT_ERROR_MESSAGE = "trial もしくは mlflow_run_id を指定してください。"
 
@@ -42,7 +42,7 @@ def logic(
         raise TypeError(ARGUMENT_ERROR_MESSAGE)
 
     # ここでlogicの変更をする
-    df_signal = kumosuke_limit(_df=df, entry_length=entry_length, entry_point=entry_point)
+    df_signal = sample_logic_limit(_df=df, entry_length=entry_length, entry_point=entry_point)
 
     return df_signal
 

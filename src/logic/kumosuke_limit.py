@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def kumosuke_limit(_df: pd.DataFrame, entry_length: int, entry_point: float) -> pd.DataFrame:
+def sample_logic_limit(_df: pd.DataFrame, entry_length: int, entry_point: float) -> pd.DataFrame:
     """
     過去 entry_length 分のローソク足 の high,low から entry_point[%] だけ離れたところに指値を置く
 
