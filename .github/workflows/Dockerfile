@@ -9,7 +9,7 @@ ENV AWS_ACCESS_KEY_ID=AWS_ACCESS_KEY_ID
 ENV AWS_SECRET_ACCESS_KEY=AWS_SECRET_ACCESS_KEY
 
 RUN adduser ${USERNAME} && \
-    mkdir /home/${USERNAME}/mlbot2 && \
+    mkdir /home/${USERNAME}/mlbot_public && \
     chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/
 
 RUN apt update && \
@@ -49,7 +49,7 @@ RUN echo 'eval "$(pyenv init -)"' >> ~/.bashrc
 
 USER ${USERNAME}
 
-WORKDIR /home/${USERNAME}/mlbot2
+WORKDIR /home/${USERNAME}/mlbot_public
 
 COPY ./docker/py_dev/requirements.txt ./requirements.txt
 
@@ -57,7 +57,7 @@ RUN ls && pwd && whoami && pip install -r requirements.txt
 
 ARG PYTHON_VERSION=3.11.7
 
-ENV PYTHONPATH="/home/${USERNAME}/mlbot2/src:/home/${USERNAME}/mlbot2/test:$PYTHONPATH"
+ENV PYTHONPATH="/home/${USERNAME}/mlbot_public/src:/home/${USERNAME}/mlbot_public/test:$PYTHONPATH"
 ENV PYENV_ROOT="/home/${USERNAME}/.pyenv"
 ENV PATH="${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:/home/${USERNAME}/.local/bin:$PATH"
 

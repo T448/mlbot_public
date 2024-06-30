@@ -1,4 +1,4 @@
-# mlbot2
+# mlbot_public
 ## influxdbの設定
 - パスワードの設定
 - バケット作成

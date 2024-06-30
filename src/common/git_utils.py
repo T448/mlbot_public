@@ -6,7 +6,7 @@ IGNORE_FILES = set(["git_utils", "imported_modules"])
 
 
 def has_diff(hash: str, file_list: List[str]) -> bool:
-    repo = git.Repo("/home/runner/mlbot2/")
+    repo = git.Repo("/home/runner/mlbot_public/")
     try:
         diffs: List[str] = repo.git.diff(hash).split("\n")
         print("repo.git.diff(hash)", repo.git.diff(hash))

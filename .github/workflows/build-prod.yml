@@ -12,5 +12,5 @@ jobs:
     # 分類器のpkl,売買で使用するコード群のみコピーしてきたimageを使用する
     steps:
       - name: execute echo command
-        run: pwd && ls && bash ~/mlbot2/.github/workflows/sample.sh
+        run: pwd && ls && bash ~/mlbot_public/.github/workflows/sample.sh
         # コンテナとマウントして、そのコンテナ内で実行する
