@@ -1,0 +1,12 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: pull
+        run: |
+          ssh -p ${{ secrets.INDIGO_PORT }} -l indigopy -i /home/runner/.ssh/id_rsa ${{ secrets.INDIGO_IP_ADDRESS }} -C "cd ~/mlbot2 && git checkout main && git pull origin main"

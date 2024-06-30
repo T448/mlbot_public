@@ -1,0 +1,34 @@
+{
+    "name": "py-dev",
+    "workspaceFolder": "/home/pyuser/project",
+    "dockerComposeFile": "../docker/docker-compose-dev.yml",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "streetsidesoftware.code-spell-checker",
+                "ms-python.python",
+                "ms-python.isort",
+                "ms-python.black-formatter",
+                "ms-python.flake8",
+                "njqdev.vscode-python-typehint",
+                "Gruntfuggly.todo-tree",
+                "oderwat.indent-rainbow",
+                "ms-python.vscode-pylance",
+                "formulahendry.code-runner",
+                "KevinRose.vsc-python-indent",
+                "ms-python.mypy-type-checker",
+                "ms-toolsai.jupyter",
+                "njpwerner.autodocstring",
+                "lukegeneva.auto-collapse-explorer",
+                "ms-ceintl.vscode-language-pack-ja",
+                "wmaurer.change-case",
+                "LittleFoxTeam.vscode-python-test-adapter"
+            ]
+        }
+    },
+    "remoteUser": "pyuser",
+    "service": "py-dev",
+    "postStartCommand": "git config --global --add safe.directory /home/pyuser/project",
+    "postCreateCommand": "/bin/sh .devcontainer/postCreateCommand.sh"
+}

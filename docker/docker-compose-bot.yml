@@ -1,0 +1,43 @@
+services:
+  bot:
+    container_name: bot
+    build: ./bot
+    image: bot
+    ports:
+      - 8889:8889
+    environment:
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI}
+      MLFLOW_S3_ENDPOINT_URL: ${MLFLOW_S3_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+      INFLUXDB_URL: ${INFLUXDB_URL}
+      ORGANIZATION: ${ORGANIZATION}
+      BYBIT_API_KEY: ${BYBIT_API_KEY}
+      BYBIT_SECRET: ${BYBIT_SECRET}
+    volumes:
+      - ../:/home/pyuser/project:cached
+    env_file:
+      - ./.env
+    stdin_open: true
+    tty: true
+    depends_on:
+      - influxdb
+  influxdb:
+    image: influxdb:2.7.1
+    container_name: influxdb
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+    ports:
+      - 8086:8086
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=password
+      - DOCKER_INFLUXDB_INIT_ORG=organization
+      - DOCKER_INFLUXDB_INIT_BUCKET=bucket
+
+volumes:
+  influxdb-data:
+  influxdb-config:
