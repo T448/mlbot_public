@@ -25,29 +25,29 @@ def main():
 
             # 実験条件の設定
             backtest_params = {
-                "backtest_params_jpy": 5000,
-                "backtest_params_usdjpy": 145,
-                "backtest_params_lot": 0.003,
-                "backtest_params_lot_min": 0.001,
-                "backtest_params_commision": 0.01,
-                "backtest_params_use_ml": True,
-                "backtest_params_use_binary_label": True,
-                "backtest_params_seed": 42,
+                "backtest_params_jpy": 5000,  # 口座残高初期値
+                "backtest_params_usdjpy": 160,  # ドル円
+                "backtest_params_lot": 0.003,  # ポジションの最大サイズ
+                "backtest_params_lot_min": 0.001,  # 最小取引単位
+                "backtest_params_commision": 0.01,  # 手数料
+                "backtest_params_use_ml": True,  # 2次モデルを使う/使わない
+                "backtest_params_use_binary_label": True,  # 2次モデルを2クラス問題とする/多クラス問題とする
+                "backtest_params_seed": 42,  # 乱数シード
             }
             optimize_params = {
-                "optimize_params_pyramiding": 3,
-                "optimize_params_optimize_target": "pnl",
-                "optimize_params_optimize_target_clf": "sr",
-                "optimize_params_n_trials": 200,
-                "optimize_params_n_trials_clf": 100,
+                "optimize_params_pyramiding": 3,  # 最大ピラミッディング数
+                "optimize_params_optimize_target": "pnl",  # 1次モデル評価指標 pnl:最終的な損益、sr:シャープレシオ、max_dd:最大ドローダウン
+                "optimize_params_optimize_target_clf": "sr",  # 2次モデル評価指標
+                "optimize_params_n_trials": 200,  # 1次モデル optunaでの試行回数
+                "optimize_params_n_trials_clf": 100,  # 2次モデル optunaでの試行回数
                 "optimize_params_class_weight": "balanced",  # "balanced" or "None"
                 # ↓↓↓↓↓ TimeSeriesSplit用 ↓↓↓↓↓
-                "optimize_params_n_splits": 5,
+                "optimize_params_n_splits": 5,  # 分割数
                 "optimize_params_max_train_size": None,
                 "optimize_params_test_size": None,
-                "optimize_params_gap": 5,
+                "optimize_params_gap": 5,  # 学習データとテストデータの間何点あけるか
                 # ↑↑↑↑↑ TimeSeriesSplit用 ↑↑↑↑↑
-                "optimize_params_evaluate_ratio": 0.25,
+                "optimize_params_evaluate_ratio": 0.25,  # evaluate step で使用するデータの割合
             }
             re_calc_features = False  # influxdbからohlcvを取得し、特徴量を再計算するフラグ。再計算には時間がかかる、使用するデータセットを揃えるため、基本的にはFalseにする。
 
