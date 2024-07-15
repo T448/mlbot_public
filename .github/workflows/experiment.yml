@@ -1,0 +1,98 @@
+name: experiment
+
+on:
+  push:
+    branches:
+      - main
+      - 'task/**'
+  workflow_dispatch:
+
+jobs:
+  check-diff:
+    runs-on: self-hosted
+    outputs:
+      has-changed-related-files: ${{ steps.check-related-files.outputs.any_changed == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check related files
+        id: check-related-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            **/requirements.txt
+            **/Dockerfile
+            **/*compose*
+  build-image:
+    runs-on: self-hosted
+    needs: check-diff
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to GitHub Container Registry
+        if: needs.check-diff.outputs.has-changed-related-files == 'true'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.ACCESS_TOKEN_GITHUB_ACTIONS }}
+      - name: Build Docker Image
+        if: needs.check-diff.outputs.has-changed-related-files == 'true'
+        run: |
+          docker build -f ~/actions-runner/_work/mlbot_public/mlbot_public/.github/workflows/Dockerfile \
+          --tag ghcr.io/t448/mlbot_public:latest \
+          --tag ghcr.io/t448/mlbot_public:$(echo $GITHUB_SHA | head -c7) \
+          .
+      - name: Push Docker Image
+        if: needs.check-diff.outputs.has-changed-related-files == 'true'
+        run: |
+          docker push ghcr.io/t448/mlbot_public:latest
+          docker push ghcr.io/t448/mlbot_public:$(echo $GITHUB_SHA | head -c7)
+      - name: skip build
+        if: needs.check-diff.outputs.has-changed-related-files == 'false'
+        run: echo 'skip build'
+  unit-test:
+    runs-on: self-hosted
+    needs: build-image
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.ACCESS_TOKEN_GITHUB_ACTIONS }}
+      - name: Set up Docker
+        run: |
+            bash ~/actions-runner/_work/mlbot_public/mlbot_public/.github/workflows/removeContainersAndImages.sh
+            docker pull ghcr.io/t448/mlbot_public:latest
+            docker run -v /home/runner/actions-runner/_work/mlbot_public/mlbot_public/:/home/runner/mlbot_public --name unit-test -p 1111:1111 --network host -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY}} -e MLFLOW_S3_ENDPOINT_URL=${{ secrets.MLFLOW_S3_ENDPOINT_URL }} -e MLFLOW_TRACKING_URI=${{ secrets.MLFLOW_TRACKING_URI }} -e PYTHONPATH=/home/runner/mlbot_public/src -e POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} -e POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} -dt ghcr.io/t448/mlbot_public:latest
+      - name: unit-test
+        run: |
+            set -o pipefail
+            docker exec unit-test /bin/sh ~/mlbot_public/.github/workflows/run_unit_test.sh
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@v1.1.47
+        with:
+          pytest-coverage-path: /home/runner/actions-runner/_work/mlbot_public/mlbot_public/pytest-coverage.txt
+          junitxml-path: /home/runner/actions-runner/_work/mlbot_public/mlbot_public/pytest.xml
+  experiment:
+    runs-on: self-hosted
+    needs: build-image
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.ACCESS_TOKEN_GITHUB_ACTIONS }}
+      - name: fetch
+        run: git fetch origin ${{ github.base_ref }} --depth=20
+      - name: Set up Docker
+        run: |
+            bash ~/actions-runner/_work/mlbot_public/mlbot_public/.github/workflows/removeContainersAndImages.sh
+            docker pull ghcr.io/t448/mlbot_public:latest
+            docker run -v /home/runner/actions-runner/_work/mlbot_public/mlbot_public/:/home/runner/mlbot_public --name experiment -p 1111:1111 --network host -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY}} -e MLFLOW_S3_ENDPOINT_URL=${{ secrets.MLFLOW_S3_ENDPOINT_URL }} -e MLFLOW_TRACKING_URI=${{ secrets.MLFLOW_TRACKING_URI }} -e PYTHONPATH=/home/runner/mlbot_public/src -e POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} -e POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} -e INFLUXDB_TOKEN=${{ secrets.INFLUXDB_TOKEN }} -e INFLUXDB_URL=${{ secrets.INFLUXDB_URL }} -e INFLUXDB_ORGANIZATION=${{ secrets.INFLUXDB_ORGANIZATION }} -dt ghcr.io/t448/mlbot_public:latest
+      - name: mlflow run
+        run: docker exec experiment /bin/sh ~/mlbot_public/.github/workflows/run_pipeline.sh

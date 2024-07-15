@@ -1,0 +1,49 @@
+services:
+  py-dev:
+    container_name: py_dev
+    build: ./py_dev
+    image: py_dev
+    env_file:
+      - ./.env.dev
+    ports:
+      - 8888:8888
+    environment:
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI}
+      MLFLOW_S3_ENDPOINT_URL: ${MLFLOW_S3_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - ../:/home/pyuser/project:cached
+      - ~/.ssh:/root/.ssh
+      - ~/.ssh:/home/pyuser/.ssh
+    working_dir: /home/pyuser/project
+    stdin_open: true
+    tty: true
+  dind:
+    build:
+      context: ./dind
+      args:
+        IMAGE_NAME: ${DIND_IMAGE_NAME}
+        PERSONAL_ACCESS_TOKEN: ${DIND_PERSONAL_ACCESS_TOKEN}
+        HOST: ${DIND_HOST}
+        ORGANIZATION: ${DIND_ORGANIZATION}
+        REPOSITORY: ${DIND_REPOSITORY}
+    env_file:
+      - ./.env.dev
+    environment:
+      IMAGE_NAME: ${DIND_IMAGE_NAME}
+      PERSONAL_ACCESS_TOKEN: ${DIND_PERSONAL_ACCESS_TOKEN}
+      HOST: ${DIND_HOST}
+      ORGANIZATION: ${DIND_ORGANIZATION}
+      REPOSITORY: ${DIND_REPOSITORY}
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI}
+      MLFLOW_S3_ENDPOINT_URL: ${MLFLOW_S3_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+      INFLUXDB_URL: ${INFLUXDB_URL}
+      INFLUXDB_ORGANIZATION: ${INFLUXDB_ORGANIZATION}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    tty: true
+    stdin_open: true
+    privileged: true

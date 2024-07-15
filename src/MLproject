@@ -1,0 +1,9 @@
+name: mlbot
+
+python_env: python_env.yaml
+
+entry_points:
+  main:
+    command: |
+      env | grep MLFLOW && \
+      python main.py --mlflow_run_id $MLFLOW_RUN_ID
