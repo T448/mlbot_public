@@ -1,0 +1,44 @@
+services:
+  nginx-proxy-for-grafana:
+    image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy-for-grafana
+    ports:
+      - 81:81
+      - 443:443
+    volumes:
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  nginx-proxy-acme:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme:/etc/acme.sh
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+    environment:
+      - DEFAULT_EMAIL=${EMAIL}
+      - NGINX_PROXY_CONTAINER=nginx-proxy-for-grafana
+    depends_on:
+      - nginx-proxy-for-grafana
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    environment:
+      - VIRTUAL_HOST=${GRAFANA_HOST}
+      - VIRTUAL_PORT=3000
+      - LETSENCRYPT_HOST=${GRAFANA_HOST}
+      - LETSENCRYPT_EMAIL=${EMAIL}
+    depends_on:
+      - nginx-proxy-acme
+
+volumes:
+  certs:
+  vhost:
+  html:
+  acme:
